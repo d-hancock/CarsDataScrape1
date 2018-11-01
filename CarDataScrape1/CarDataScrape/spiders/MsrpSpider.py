@@ -4,6 +4,8 @@ from typing import List
 from CarDataScrape1.CarDataScrape.items import CarDataItemLoader
 from CarDataScrape1.CarDataScrape.items import CarDataItem
 import itertools
+import scrapy
+from CarDataScrape1.CarDataScrape.items import CarDataItem, CarDataItemLoader,
 
 
 class MsrpSpider(scrapy.Spider):
@@ -11,7 +13,7 @@ class MsrpSpider(scrapy.Spider):
     allowed_domains = ['https://www.jdpower.com']
 
     def start_requests(self):
-        makes: List[str] = ['Acura', 'Aston-Martin', 'Audi', 'BMW', 'Buick', 'Cadillac',
+        makes: List[str] = ['Acura', 'Aston-Martin', 'BMW', 'Buick', 'Cadillac',
                             'Chevrolet', 'Chrysler', 'Dodge', 'FIAT', 'Ford', 'GMC', 'Honda',
                             'Hummer', 'Hyundai', 'INFINITI', 'Jaguar', 'Jeep', 'Kia',
                             'Land-Rover', 'Lexus', 'Lincoln', 'Lotus', 'Mazda', 'Mercedes-Benz', 'Mitsubishi', 'Nissan',
@@ -55,5 +57,16 @@ class MsrpSpider(scrapy.Spider):
 
     def parse(self, response):
         for vehicle in response.css('div.veh-spacer'):
-            yield {
-            }
+            loader = CarDataItemLoader(item=CarDataItem(), response=response)
+            loader.add_xpath('full_name', '//div[@class="veh-icons__title"]/text()').extract()
+            loader.add_xpath('year', '//div[@class="veh-icons__title"]/text()').extract()
+            loader.add_xpath('make', '//div[@class="veh-icons__title"]/text()').extract()
+            model_loader = loader.nested_css('div.veh-spacer')
+            model_loader.add_xpath('full_name', './div[2]/a/div/text()')
+            model_loader.add_xpath('msrp_high',
+                                   './div/div[2]/div[2]/div[1]/div/span[@class="veh-group__attribute-value"]/text()')
+            model_loader.add_xpath('msrp_low',
+                                   './div/div[2]/div[2]/div[1]/div/span[@class="veh-group__attribute-value"]/text()')
+            yield loader.load_item()
+
+

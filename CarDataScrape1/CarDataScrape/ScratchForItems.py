@@ -1,14 +1,5 @@
-2019
-Acura
-ILX: year
-make
-model
-trim
-high - msrp
-low - msrp
 
-string = "2019 Jeep models"
+makes = ["Acura", "Aston-Martin"]
+urls = []
+urls.append([f"https://www.jdpower.com/Cars/2019/{make}" for make in makes])
 
-
-def filter_models(x):
-    return x.replace(' models', '')
